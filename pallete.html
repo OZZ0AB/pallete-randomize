@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Color Palette Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 1rem;
+      text-align: center;
+      background: #222;
+      color: #fff;
+    }
+    #palette {
+      flex: 1;
+      display: flex;
+    }
+    .color-block {
+      flex: 1;
+      position: relative;
+      cursor: pointer;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+    }
+    .color-block:hover {
+      filter: brightness(1.1);
+    }
+    .hex {
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    }
+    .lock-btn {
+      margin-top: 0.5rem;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .lock-btn.locked {
+      background: rgba(0, 0, 0, 0.8);
+    }
+    footer {
+      padding: 1rem;
+      text-align: center;
+      background: #eee;
+    }
+    button#generate {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎨 Color Palette Generator</h1>
+  </header>
+
+  <div id="palette"></div>
+
+  <footer>
+    <button id="generate">🔄 Generate New</button>
+  </footer>
+
+  <script>
+    const palette = document.getElementById('palette');
+    const generateBtn = document.getElementById('generate');
+
+    const generateRandomColor = () => {
+      const hex = Math.floor(Math.random() * 0xffffff).toString(16);
+      return '#' + hex.padStart(6, '0');
+    };
+
+    const createColorBlock = (color, locked = false) => {
+      const block = document.createElement('div');
+      block.className = 'color-block';
+      block.style.backgroundColor = color;
+
+      const hexText = document.createElement('div');
+      hexText.className = 'hex';
+      hexText.textContent = color;
+      hexText.title = "Click to copy";
+
+      const lockBtn = document.createElement('button');
+      lockBtn.className = 'lock-btn';
+      lockBtn.textContent = locked ? '🔒 Locked' : '🔓 Lock';
+      if (locked) lockBtn.classList.add('locked');
+
+      block.appendChild(hexText);
+      block.appendChild(lockBtn);
+
+      // Events
+      hexText.addEventListener('click', () => {
+        navigator.clipboard.writeText(color);
+        hexText.textContent = '✅ Copied!';
+        setTimeout(() => hexText.textContent = color, 800);
+      });
+
+      lockBtn.addEventListener('click', () => {
+        lockBtn.classList.toggle('locked');
+        const isLocked = lockBtn.classList.contains('locked');
+        lockBtn.textContent = isLocked ? '🔒 Locked' : '🔓 Lock';
+      });
+
+      return block;
+    };
+
+    const generatePalette = () => {
+      const currentBlocks = [...palette.children];
+      if (currentBlocks.length === 5) {
+        currentBlocks.forEach(block => {
+          const lockBtn = block.querySelector('.lock-btn');
+          const isLocked = lockBtn.classList.contains('locked');
+          if (!isLocked) {
+            const newColor = generateRandomColor();
+            block.style.backgroundColor = newColor;
+            block.querySelector('.hex').textContent = newColor;
+          }
+        });
+      } else {
+        palette.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+          const color = generateRandomColor();
+          const block = createColorBlock(color);
+          palette.appendChild(block);
+        }
+      }
+    };
+
+    // Init
+    generatePalette();
+    generateBtn.addEventListener('click', generatePalette);
+  </script>
+</body>
+</html>
